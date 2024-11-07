@@ -1,0 +1,81 @@
+# Maintainer: NullX47 <nullx47@archlinux.org>
+
+pkgname=anonymized-dnscrypt-proxy
+_pkgname=dnscrypt-proxy
+pkgver=2.1.5.r90.g4ed02b02
+pkgrel=1
+pkgdesc="Wipe Snoopers Out Of Your Networks"
+arch=('x86_64')
+url="https://github.com/NullX47/archlinux-aur/anonymized-dnscrypt-proxy"
+license=(ISC)
+depends=(glibc)
+makedepends=(git go)
+optdepends=('python-urllib3: for generate-domains-blocklist')
+backup=(
+  etc/$_pkgname/$_pkgname.toml
+  etc/$_pkgname/allowed-ips.txt
+  etc/$_pkgname/allowed-names.txt
+  etc/$_pkgname/blocked-ips.txt
+  etc/$_pkgname/blocked-names.txt
+  etc/$_pkgname/cloaking-rules.txt
+  etc/$_pkgname/forwarding-rules.txt
+)
+provides=(dnscrypt-proxy)
+conflicts=(dnscrypt-proxy)
+install=$_pkgname.install
+# NOTE: LTO breaks reproducibility :(
+options=(!lto)
+source=(
+	git+https://github.com/dnscrypt/$_pkgname.git
+	$_pkgname.toml
+	$_pkgname.service
+	$_pkgname.socket
+)
+sha512sums=('SKIP'
+            'a322ddb20edfd2b2354d10c29c81e1407f9e170e8ff1667ce79ee1bef71635e01762e89f2ffa6ffd9d65617c795b48aabe26f1d84d0e8b9e35685b380a6503b5'
+            '50e6c878115c96e72f6118008e92871957a699d89bd0b85c80af45e6880a30b0832995e4718ab585b086049cc64e2b0759f8f4263ef814d74929933534403f92'
+            '9f9deeb55b32ea7c289fc17e12c353dcb955b695259311ab20a0ff6c22cbd7a22ef4de1e06a4260b8923721f98754520316669191e69869dce3b69d1329e5c36')
+validpgpkeys=('5CD03BF7BFB59CF89BC920028D0C96815D9E7713') # NullX47 <nullx47@archlinux.org>
+
+pkgver() {
+	cd "$_pkgname"
+	git describe --long | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+build() {
+	cd $_pkgname/$_pkgname
+	export CGO_CPPFLAGS="$CPPFLAGS"
+	export CGO_CFLAGS="$CFLAGS"
+	export CGO_CXXFLAGS="$CXXFLAGS"
+	export CGO_LDFLAGS="$LDFLAGS"
+	export GOPATH="$srcdir"
+	export GOFLAGS="-buildmode=pie -mod=readonly -modcacherw"
+
+	go build -ldflags "-compressdwarf=false -linkmode external" .
+}
+
+check() {
+  cd $_pkgname
+  go test ./...
+}
+
+package() {
+	local _config
+	cd $_pkgname
+	# executable
+	install -Dm 755 $_pkgname/$_pkgname -t "$pkgdir/usr/bin/"
+	# config files
+	install -Dm 644 ../$_pkgname.toml "$pkgdir/etc/$_pkgname/$_pkgname.toml"
+	for _config in {{allowed,blocked}-{ips,names},{cloaking,forwarding}-rules,captive-portals}.txt; do
+		install -Dm 644 $_pkgname/example-$_config "$pkgdir/etc/$_pkgname/$_config"
+	done
+	# utils
+	install -Dm 644 utils/generate-domains-blocklist/*.{conf,txt} -t "$pkgdir/usr/share/$_pkgname/utils/generate-domains-blocklist"
+	install -Dm 755 utils/generate-domains-blocklist/generate-domains-blocklist.py "$pkgdir/usr/bin/generate-domains-blocklist"
+	# systemd service/socket
+	install -Dm 644 ../$_pkgname.{service,socket} -t "$pkgdir/usr/lib/systemd/system/"
+	# license
+	install -Dm 644 LICENSE -t "$pkgdir/usr/share/licenses/$_pkgname"
+	# docs
+	install -Dm 644 {ChangeLog,README.md} -t "$pkgdir/usr/share/doc/$_pkgname"
+}
