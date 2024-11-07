@@ -11,8 +11,8 @@ Originaly intended to fit my needs and build custom or unavailable packages.
 - Trust my public key:
 ```
 pacman-key --init
-curl -sL 'https://keybase.io/apinon/pgp_keys.asc?fingerprint=%' | sudo pacman-key -a -
-pacman-key --lsign-key %
+curl -sL 'https://keybase.io/nullx47/public-key.asc?fingerprint=5CD03BF7BFB59CF89BC920028D0C96815D9E7713' | sudo pacman-key -a -
+pacman-key --lsign-key 5CD03BF7BFB59CF89BC920028D0C96815D9E7713
 ```
 
 - Edit `/etc/pacman.conf` with:
