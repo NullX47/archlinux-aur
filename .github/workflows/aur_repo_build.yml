@@ -1,0 +1,160 @@
+name: Run - Build Repo
+
+on:
+  push:
+    branches: 
+    - master
+  pull_request:
+    branches: 
+    - master
+  # Allow manual trigger as well
+  workflow_dispatch:
+    
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.generate-matrix.outputs.matrix }}
+    steps:
+      - 
+        name: Checkout
+        uses: actions/checkout@v4.2.2
+        with:
+          submodules: true
+      - 
+        name: Generate Matrix
+        id: generate-matrix
+        run: |
+          sudo apt-get install jq
+          MATRIX_JSON=`find * -type f -name "PKGBUILD" -printf "%h\n" | jq -Rnc '."package" |= [inputs]'`
+          echo ${MATRIX_JSON}
+          echo "matrix=${MATRIX_JSON}" >> $GITHUB_OUTPUT
+  build_packages:
+    needs: metadata
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      max-parallel: 4
+      matrix: ${{ fromJson(needs.metadata.outputs.matrix) }}
+      fail-fast: false
+    steps:
+      - 
+        name: Checkout
+        uses: actions/checkout@v4.2.2
+        with:
+          submodules: true
+      - 
+        name: Prepare Job REPO_FOLDER env var
+        run: |
+          echo "REPO_FOLDER=$GITHUB_WORKSPACE/repo/x86_64" >> $GITHUB_ENV
+      - 
+        name: Import GPG key
+        id: import-gpg-key
+        uses: crazy-max/ghaction-import-gpg@v6.2.0
+        with:
+          gpg_private_key: ${{ secrets.gpg_private_key }}
+      - 
+        name: Build ${{ matrix.package }}
+        working-directory: ./${{ matrix.package }}
+        run: |
+          time docker run --rm -i -e EXPORT_PKG=true -e CHECKSUM_SRC=true  -e PGPKEY="${{ secrets.GPG_PRIVATE_KEY }}" -e PACKAGER="${{ steps.import-gpg-key.outputs.name }} <${{ steps.import-gpg-key.outputs.email }}>" -e GPGKEY="${{ steps.import-gpg-key.outputs.keyid }}" -v "$(pwd):/pkg" -v "${{ env.REPO_FOLDER }}:/home/notroot/packages" "nullx47/docker-makepkg:latest"
+          outputpkg="$(find . -type f -name '${{ matrix.package }}-*.pkg.tar*')"
+          mv $outputpkg ${{ env.REPO_FOLDER }}/
+      - 
+        name: Save package
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: package-${{ matrix.package }}
+          path: ${{ env.REPO_FOLDER }}/
+          retention-days: 1
+          overwrite: true
+  build_repo:
+    needs: build_packages
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    steps:
+      - 
+        name: Restore packages
+        id: restore
+        uses: actions/download-artifact@v4.1.8
+        with:
+          pattern: package-*
+          merge-multiple: true
+      - 
+        name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6.2.0
+        with:
+          gpg_private_key: ${{ secrets.gpg_private_key }}
+      - 
+        name: Create repo DB
+        run: |
+          REPO_NAME="$(
+            basename $GITHUB_WORKSPACE
+          )"
+          repo-add --sign $REPO_NAME.db.tar.gz ./*.pkg.tar.zst
+          # * Delete DB files symlink
+          find . -type l -delete
+          # * Rename compressed DB
+          rename -- .tar.gz '' *.tar.gz
+          rename -- .tar.gz.sig '.sig' *.tar.gz.sig
+      - 
+        name: Create GitHub App Token
+        uses: actions/create-github-app-token@v1.11.0
+        id: generate-token
+        with:
+          app_id: ${{ secrets.app_id }}
+          private_key: ${{ secrets.app_private_key }}
+      - 
+        name: "Get current date"
+        run: |
+          echo "builddate=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
+        id: date
+      - 
+        name: Create release and upload artifacts
+        id: upload-artifacts
+        continue-on-error: true
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          token: "${{ steps.generate-token.outputs.token }}"
+          artifactErrorsFailBuild: true
+          removeArtifacts: true
+          allowUpdates: true
+          generateReleaseNotes: true
+          tag: x86_64
+          name: ${{ steps.date.outputs.builddate }}
+          artifacts: "./*"
+          body: |
+            Archlinux x86_64 repo packages
+      - 
+        name: Create release and upload artifacts - Retry
+        if: steps.upload-artifacts.outcome == 'failure'
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          token: "${{ steps.generate-token.outputs.token }}"
+          artifactErrorsFailBuild: true
+          removeArtifacts: true
+          allowUpdates: true
+          generateReleaseNotes: true
+          tag: x86_64
+          name: ${{ steps.date.outputs.builddate }}
+          artifacts: "./*"
+          body: |
+            Archlinux x86_64 repo packages
+      - 
+        name: Count the Arch Packages
+        run: |
+          echo "COUNT=$(find ./* -type f -name '*.pkg.tar.*' | wc -l)" >> $GITHUB_ENV
+      - 
+        name: Create the Count Badge
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.gist_token }}
+          gistID: 132942d2df637468bab091c818632abb
+          filename: count-arch-packages.json
+          style: for-the-badge
+          namedLogo: Files
+          logoColor: white
+          label: Packages count
+          message: ${{ env.COUNT }}
+          color: blue
