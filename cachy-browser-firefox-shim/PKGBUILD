@@ -8,6 +8,8 @@ arch=('any')
 url="https://github.com/CachyOS/CachyOS-Browser-Settings"
 license=('MIT')
 depends=('cachy-browser')
+source=("emptyfile")
+sha256sums=('SKIP')
 provides=(
   "firefox=${pkgver}"
 )
