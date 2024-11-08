@@ -22,7 +22,7 @@ provides=('materialgram')
 conflicts=('materialgram-bin')
 options=(!debug)
 
-source=("${_name}::git+https://github.com/kukuruzka165/${_name}.git")
+source=("${_name}::git+https://github.com/telegramdesktop/tdesktop.git")
 sha512sums=('SKIP')
 
 pkgver() {
@@ -32,10 +32,9 @@ pkgver() {
 
 prepare() {
     cd "${srcdir}/${_name}"
-    git remote add upstream https://github.com/telegramdesktop/tdesktop.git
-    git fetch upstream
-    git checkout main
-    git merge upstream/main
+    git remote add ${_name} https://github.com/kukuruzka165/${_name}.git
+    git fetch ${_name}
+    git merge ${_name}/dev
     git submodule update --init --recursive
 }
 
