@@ -96,29 +96,29 @@ package() {
     # Apply spotify patch for clear app cache, enable dev mode, hide non-music categories, apply spicetify customization
     mkdir -p "$pkgdir/usr/share/$pkgname/"
     cat <<- EOF > "$pkgdir/usr/share/$pkgname/spotify_patcher.sh"
-	    #!/bin/env bash
+	#!/bin/env bash
 
-                spotx -cdh
-                spicetify config custom_apps marketplace
-                spicetify config inject_css 1
-                spicetify config replace_colors 1
-                spicetify config current_theme marketplace
-                spicetify apply
+        spotx -cdh
+        spicetify config custom_apps marketplace
+        spicetify config inject_css 1
+        spicetify config replace_colors 1
+        spicetify config current_theme marketplace
+        spicetify apply
 
     EOF
     mkdir -p "$pkgdir/usr/share/libalpm/hooks/"
     cat <<- EOF > "$pkgdir/usr/share/libalpm/hooks/spotify-patch.hook"
-	    [Trigger]
-                Type = Package
-	    Operation = Install
-	    Operation = Upgrade
-	    Target = ${depends[0]%=*}
-	    Target = ${pkgname}
+	[Trigger]
+        Type = Package
+	Operation = Install
+	Operation = Upgrade
+	Target = ${depends[0]%=*}
+	Target = ${pkgname}
 
-                [Action]
-	    Description = Patching Spotify libraries...
-	    When = PostTransaction
-	    Exec = /usr/bin/bash "/usr/share/$pkgname/spotify_patcher.sh"
+        [Action]
+	Description = Patching Spotify libraries...
+	When = PostTransaction
+	Exec = /usr/bin/bash "/usr/share/$pkgname/spotify_patcher.sh"
 
     EOF
 }
