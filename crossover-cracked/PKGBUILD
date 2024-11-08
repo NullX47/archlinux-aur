@@ -19,10 +19,12 @@ install=${_pkgname}.install
 source=(
 "https://media.codeweavers.com/pub/${_pkgname}/cxlinux/demo/${_pkgname}_${pkgver}-${_pkgdebrel}.deb"
 "crossover.linux"
+"license.txt"
 )
 sha256sums=(
 'ff6be19a176bbab4e6f8ad4cce853f4c2892ae606b7eae63f3a3cbb75647a9dc'
 '75bb475d902c750ae1747596dbcf59b42ad3f253d35d4107f2c5e8a424b71d2c'
+'8b4c59697356d7090346eae5d289c80f25a879d76deacb9bf9ba863bbfa5474d'
 )
 
 depends=( 
