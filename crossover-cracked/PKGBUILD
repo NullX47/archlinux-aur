@@ -146,6 +146,7 @@ package() {
             rm key.pem
 
     EOF
+
     mkdir -p "$pkgdir/usr/share/libalpm/hooks/"
     cat <<- EOF > "$pkgdir/usr/share/libalpm/hooks/crossover-patch.hook"
 	    [Trigger]
