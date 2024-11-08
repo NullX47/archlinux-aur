@@ -1,0 +1,6 @@
+[crosslin]
+customer=NullX47
+email=nullx47@archlinux.org
+expires=2030/01/01
+[license]
+id=a4xdUZD2bWB00tQI
