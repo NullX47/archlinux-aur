@@ -12,7 +12,7 @@ depends=("git" "python")
 provides=("$_pkgname")
 conflicts=("$_pkgname")
 source=("$_pkgname::git+https://android.googlesource.com/tools/repo.git")
-sha256sums=('0b794443270aaaa9c9cb7b989574c489fd6633b9d94ccdd53659cac1c14e8376')
+sha256sums=('SKIP')
 
 pkgver() {
   cd "$_pkgname"
