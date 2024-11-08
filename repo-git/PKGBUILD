@@ -1,0 +1,28 @@
+# Maintainer: NullX47 <nullx47@gmail.com>
+
+_pkgname=repo
+pkgname=repo-git
+pkgver=2.49.r5.ga8cf575d
+pkgrel=1
+pkgdesc="The Multiple Git Repository Tool from the Android Open Source Project"
+url="https://android.googlesource.com/tools/repo"
+arch=('any')
+license=("Apache-2.0")
+depends=("git" "python")
+provides=("$_pkgname")
+conflicts=("$_pkgname")
+source=("$_pkgname::git+https://android.googlesource.com/tools/repo.git")
+sha256sums=('0b794443270aaaa9c9cb7b989574c489fd6633b9d94ccdd53659cac1c14e8376')
+
+pkgver() {
+  cd "$_pkgname"
+  git describe --long | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+package() {
+  cd "$_pkgname"
+  install -vDm755 repo "$pkgdir/usr/bin/repo"
+  install -vDm644 docs/manifest-format.md "$pkgdir/usr/share/doc/$pkgname/manifest-format.md"
+  install -vDm644 -t "$pkgdir/usr/share/man/man1" man/*
+  install -vDm644 completion.bash "$pkgdir"/usr/share/bash-completion/completions/repo
+}
