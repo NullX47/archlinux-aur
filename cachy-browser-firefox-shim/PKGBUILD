@@ -1,7 +1,7 @@
 # Inspired by existing AUR package librewolf-firefox-shim
 # Maintainer:  Marko Korhonen <aur@marko.korhonen.cc>
 pkgname=cachy-browser-firefox-shim
-pkgver=131.0.3-1
+pkgver=131.0.3
 pkgrel=1
 pkgdesc="A symlink for using Cachy Browser as Firefox"
 arch=('any')
