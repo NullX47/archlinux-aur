@@ -130,36 +130,35 @@ package() {
     # place license in correct directory
     install -D -m644 ${pkgdir}/opt/cxoffice/doc/license.txt.gz ${pkgdir}/usr/share/licenses/${_pkgname}/license.txt.gz
 
-    # Apply crossover crack
-    mkdir -p "$pkgdir/usr/share/$pkgname/"
-    cat -A <<- EOF > "$pkgdir/usr/share/$pkgname/crossover_patcher.sh"
-	    #!/bin/env bash
-
-            # Fix license
-            openssl genrsa -out key.pem 2048
-            openssl rsa -in key.pem -outform PEM -pubout -out public.pem
-            mv public.pem /opt/cxoffice/share/crossover/data/tie.pub
-            echo -e "[crosslin]\ncustomer=NullX47\nemail=nullx47@archlinux.org\nexpires=2030/01/01\n[license]\nid=a4xdUZD2bWB00tQI" > license.txt
-            openssl dgst -sha256 -sign key.pem -out license.sha256 license.txt
-            mv license.txt /opt/cxoffice/etc/
-            mv license.sha256 /opt/cxoffice/etc/
-            rm key.pem
-
-    EOF
-
-    mkdir -p "$pkgdir/usr/share/libalpm/hooks/"
-    cat -A <<- EOF > "$pkgdir/usr/share/libalpm/hooks/crossover-patch.hook"
-	    [Trigger]
-	    Type = Package
-	    Operation = Install
-	    Operation = Upgrade
-	    Target = ${depends[0]%=*}
-	    Target = ${pkgname}
-
-	    [Action]
-	    Description = Patching Crossover license...
-	    When = PostTransaction
-	    Exec = /usr/bin/bash "/usr/share/$pkgname/crossover_patcher.sh"
-
-    EOF
+	# Apply crossover crack
+	mkdir -p "$pkgdir/usr/share/$pkgname/"
+	cat <<- EOF > "$pkgdir/usr/share/$pkgname/crossover_patcher.sh"
+		#!/bin/env bash
+		
+		# Fix license
+		openssl genrsa -out key.pem 2048
+		openssl rsa -in key.pem -outform PEM -pubout -out public.pem
+		mv public.pem /opt/cxoffice/share/crossover/data/tie.pub
+		echo -e "[crosslin]\ncustomer=NullX47\nemail=nullx47@archlinux.org\nexpires=2030/01/01\n[license]\nid=a4xdUZD2bWB00tQI" > license.txt
+		openssl dgst -sha256 -sign key.pem -out license.sha256 license.txt
+		mv license.txt /opt/cxoffice/etc/
+		mv license.sha256 /opt/cxoffice/etc/
+		rm key.pem
+		
+	EOF
+	mkdir -p "$pkgdir/usr/share/libalpm/hooks/"
+	cat <<- EOF > "$pkgdir/usr/share/libalpm/hooks/crossover-patch.hook"
+		[Trigger]
+		Type = Package
+		Operation = Install
+		Operation = Upgrade
+		Target = ${depends[0]%=*}
+		Target = ${pkgname}
+		
+		[Action]
+		Description = Patching Crossover license...
+		When = PostTransaction
+		Exec = /usr/bin/bash "/usr/share/$pkgname/crossover_patcher.sh"
+		
+	EOF
 }
