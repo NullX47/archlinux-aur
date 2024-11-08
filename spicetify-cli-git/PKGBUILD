@@ -1,6 +1,6 @@
 ## Maintainer: khanhas <xuankhanh963@gmail.com>, itsmeow <itsmeow@itsmeow.dev>
-pkgname=spicetify-cli
-_gitname="${pkgname}-git"
+_gitname=spicetify-cli
+pkgname="${_gitname}-git"
 pkgver=2.38.4
 pkgrel=2
 pkgdesc='Command-line tool to customize Spotify client'
@@ -13,7 +13,7 @@ optdepends=('xdg-utils: Allows for opening directories in default file manager')
 source=("${_gitname}::git+${url}.git")
 sha256sums=('SKIP')
 provides=("${_gitname}")
-conflicts=("${pkgname}")
+conflicts=("${_gitname}")
 
 pkgver() {
   cd "$srcdir/${_gitname}"
@@ -41,19 +41,19 @@ package() {
   cd "${_gitname}"
   
   # install everything to /opt
-  install -Dm755 ./spicetify "${pkgdir}/opt/${pkgname}/spicetify"
-  cp -r ./CustomApps "${pkgdir}/opt/${pkgname}/CustomApps"
-  cp -r ./Extensions "${pkgdir}/opt/${pkgname}/Extensions"
-  cp -r ./jsHelper "${pkgdir}/opt/${pkgname}/jsHelper"
-  cp -r ./Themes "${pkgdir}/opt/${pkgname}/Themes"
+  install -Dm755 ./spicetify "${pkgdir}/opt/${_gitname}/spicetify"
+  cp -r ./CustomApps "${pkgdir}/opt/${_gitname}/CustomApps"
+  cp -r ./Extensions "${pkgdir}/opt/${_gitname}/Extensions"
+  cp -r ./jsHelper "${pkgdir}/opt/${_gitname}/jsHelper"
+  cp -r ./Themes "${pkgdir}/opt/${_gitname}/Themes"
 
-  install -Dm755 ./css-map.json "${pkgdir}/opt/${pkgname}/css-map.json"
-  install -Dm755 ./globals.d.ts "${pkgdir}/opt/${pkgname}/globals.d.ts"
+  install -Dm755 ./css-map.json "${pkgdir}/opt/${_gitname}/css-map.json"
+  install -Dm755 ./globals.d.ts "${pkgdir}/opt/${_gitname}/globals.d.ts"
 
   # Make shortcut
   install -dm755 "${pkgdir}/usr/bin"
   echo "#!/bin/sh
-exec /opt/${pkgname}/spicetify \"\$@\"" > "${pkgdir}/usr/bin/spicetify"
+exec /opt/${_gitname}/spicetify \"\$@\"" > "${pkgdir}/usr/bin/spicetify"
   chmod 755 "${pkgdir}/usr/bin/spicetify"
 
   # Clean up deps
