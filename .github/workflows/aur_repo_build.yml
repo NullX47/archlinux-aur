@@ -54,7 +54,7 @@ jobs:
         name: Build ${{ matrix.package }}
         working-directory: ./${{ matrix.package }}
         run: |
-          time docker run --rm -i -e EXPORT_PKG=true -e CHECKSUM_SRC=true  -e PGPKEY="${{ secrets.GPG_PRIVATE_KEY }}" -e PACKAGER="${{ steps.import-gpg-key.outputs.name }} <${{ steps.import-gpg-key.outputs.email }}>" -e GPGKEY="${{ steps.import-gpg-key.outputs.keyid }}" -v "$(pwd):/pkg" -v "${{ env.REPO_FOLDER }}:/home/notroot/packages" "nullx47/docker-makepkg:latest"
+          time docker run --rm -e EXPORT_PKG=true -e CHECKSUM_SRC=true  -e PGPKEY="${{ secrets.GPG_PRIVATE_KEY }}" -e PACKAGER="${{ steps.import-gpg-key.outputs.name }} <${{ steps.import-gpg-key.outputs.email }}>" -e GPGKEY="${{ steps.import-gpg-key.outputs.keyid }}" -v "$(pwd):/pkg" -v "${{ env.REPO_FOLDER }}:/home/notroot/packages" "nullx47/docker-makepkg:latest"
           outputpkg="$(find . -type f -name '${{ matrix.package }}-*.pkg.tar*')"
           mv $outputpkg ${{ env.REPO_FOLDER }}/
       - 
