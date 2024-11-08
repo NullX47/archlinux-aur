@@ -13,11 +13,10 @@ optdepends=('xdg-utils: Allows for opening directories in default file manager')
 source=("${_gitname}::git+${url}.git")
 sha256sums=('SKIP')
 provides=("${_gitname}")
-conflicts=("${_gitname}")
+conflicts=("${pkgname}")
 
 pkgver() {
-	cd "$srcdir/${_gitname}"
-
+  cd "$srcdir/${_gitname}"
   git describe --long --tags | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
 }
 
