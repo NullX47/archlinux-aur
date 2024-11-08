@@ -64,7 +64,7 @@ build() {
             echo "pluginsFolder "${srcdir}"/.yarn/plugins"
             echo "globalFolder "${srcdir}"/.yarn/global"
             echo 'useHardlinks true'
-            #echo 'buildFromSource true'
+            echo 'buildFromSource true'
             echo 'linkWorkspacePackages true'
             echo 'fetchRetries 3'
             echo 'fetchRetryTimeout 10000'
