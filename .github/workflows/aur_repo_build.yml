@@ -1,9 +1,6 @@
 name: Run - Build Repo
 
 on:
-  push:
-    branches: 
-    - master
   pull_request:
     branches: 
     - master
