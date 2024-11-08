@@ -39,18 +39,18 @@ _ensure_local_nvm() {
     nvm use "${_nodeversion}"
 }
 build() {
-    sed -e -i "
+    sed -e "
         s/@electronversion@/${_electronversion}/g
         s/@appname@/${pkgname}/g
         s/@runname@/app/g
         s/@cfgdirname@/${_pkgname}/g
         s/@options@/env ELECTRON_OZONE_PLATFORM_HINT=auto/g
-    " "${srcdir}/${pkgname}.sh"
+    " -i "${srcdir}/${pkgname}.sh"
     _ensure_local_nvm
     gendesk -q -f -n --pkgname="${pkgname}" --pkgdesc="${pkgdesc}" --categories="Network" --name="${_pkgname}" --exec="${pkgname} %U"
     cd "${srcdir}/${pkgname}-${pkgver}"
     export ELECTRON_SKIP_BINARY_DOWNLOAD=1
-    export SYSTEM_ELECTRON_VERSION="electron${_electronversion} -v | sed 's/v//g')"
+    export SYSTEM_ELECTRON_VERSION="$(electron${_electronversion} -v | sed 's/v//g')"
     HOME="${srcdir}/.electron-gyp"
     mkdir -p "${srcdir}/.electron-gyp"
     if [[ "$(curl -s ipinfo.io/country)" == *"CN"* ]]; then
@@ -71,7 +71,9 @@ build() {
         } >> .yarnrc
         sed -i "s/registry.yarnpkg.com/registry.npmmirror.com/g" yarn.lock
     fi
-    sed -i "s|\"electron\": \"\([^\"]*\)\"|\"electron\": \"${SYSTEM_ELECTRON_VERSION}\"|g" package.json
+    sed "s|\"electron\": \"\([^\"]*\)\"|\"electron\": \"${SYSTEM_ELECTRON_VERSION}\"|g" -i package.json
+    echo ${SYSTEM_ELECTRON_VERSION}
+    cat package.json
     NODE_ENV=development    yarn install --cache-folder "${srcdir}/.yarn_cache"
     NODE_ENV=production     yarn run package
 }
