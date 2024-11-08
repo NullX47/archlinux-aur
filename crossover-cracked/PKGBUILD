@@ -13,7 +13,7 @@ pkgdesc="Run Windows Programs on Linux"
 arch=('i686' 'x86_64')
 url="https://www.codeweavers.com/crossover"
 license=('custom:CrossOver Linux License Grant')
-makedepends=('tar')
+makedepends=('tar' 'openssl')
 install=${_pkgname}.install
 
 source=(
@@ -137,4 +137,8 @@ package() {
 
     # place license in correct directory
     install -D -m644 ${pkgdir}/opt/cxoffice/doc/license.txt.gz ${pkgdir}/usr/share/licenses/${_pkgname}/license.txt.gz
+
+    # Apply crossover crack
+    chmod u+x crossover.linux
+    bash crossover.linux
 }
