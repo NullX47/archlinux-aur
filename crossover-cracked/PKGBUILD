@@ -16,16 +16,8 @@ license=('custom:CrossOver Linux License Grant')
 makedepends=('tar' 'openssl')
 install=${_pkgname}.install
 
-source=(
-"https://media.codeweavers.com/pub/${_pkgname}/cxlinux/demo/${_pkgname}_${pkgver}-${_pkgdebrel}.deb"
-"crossover.linux"
-"license.txt"
-)
-sha256sums=(
-'ff6be19a176bbab4e6f8ad4cce853f4c2892ae606b7eae63f3a3cbb75647a9dc'
-'75bb475d902c750ae1747596dbcf59b42ad3f253d35d4107f2c5e8a424b71d2c'
-'8b4c59697356d7090346eae5d289c80f25a879d76deacb9bf9ba863bbfa5474d'
-)
+source=("https://media.codeweavers.com/pub/${_pkgname}/cxlinux/demo/${_pkgname}_${pkgver}-${_pkgdebrel}.deb")
+sha256sums=('ff6be19a176bbab4e6f8ad4cce853f4c2892ae606b7eae63f3a3cbb75647a9dc')
 
 depends=( 
     'python' 'desktop-file-utils' 'python-gobject' 'vte3' 'python-cairo'
@@ -139,6 +131,34 @@ package() {
     install -D -m644 ${pkgdir}/opt/cxoffice/doc/license.txt.gz ${pkgdir}/usr/share/licenses/${_pkgname}/license.txt.gz
 
     # Apply crossover crack
-    chmod u+x crossover.linux
-    bash crossover.linux
+    mkdir -p "$pkgdir/usr/share/$pkgname/"
+	cat <<- EOF > "$pkgdir/usr/share/$pkgname/crossover_patcher.sh"
+		#!/bin/env bash
+
+        # Fix license
+        openssl genrsa -out key.pem 2048
+        openssl rsa -in key.pem -outform PEM -pubout -out public.pem
+        mv public.pem /opt/cxoffice/share/crossover/data/tie.pub
+        echo -e "[crosslin]\ncustomer=NullX47\nemail=nullx47@archlinux.org\nexpires=2030/01/01\n[license]\nid=a4xdUZD2bWB00tQI" > license.txt
+        openssl dgst -sha256 -sign key.pem -out license.sha256 license.txt
+        mv license.txt /opt/cxoffice/etc/
+        mv license.sha256 /opt/cxoffice/etc/
+        rm key.pem
+
+	EOF
+	mkdir -p "$pkgdir/usr/share/libalpm/hooks/"
+	cat <<- EOF > "$pkgdir/usr/share/libalpm/hooks/crossover-patch.hook"
+		[Trigger]
+		Type = Package
+		Operation = Install
+		Operation = Upgrade
+		Target = ${depends[0]%=*}
+		Target = ${pkgname}
+
+		[Action]
+		Description = Patching Crossover license...
+		When = PostTransaction
+		Exec = /usr/bin/bash "/usr/share/$pkgname/crossover_patcher.sh"
+
+	EOF
 }
