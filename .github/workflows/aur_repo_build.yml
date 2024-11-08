@@ -141,7 +141,7 @@ jobs:
       - 
         name: Count the Arch Packages
         run: |
-          echo "COUNT=$(find ./* -type f -name '*.pkg.tar.*' | wc -l)" >> $GITHUB_ENV
+          echo "COUNT=$(find ./* -type f -name '*.pkg.tar.zst' | wc -l)" >> $GITHUB_ENV
       - 
         name: Create the Count Badge
         uses: schneegans/dynamic-badges-action@v1.7.0
