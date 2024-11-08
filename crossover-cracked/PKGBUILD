@@ -132,7 +132,7 @@ package() {
 
     # Apply crossover crack
     mkdir -p "$pkgdir/usr/share/$pkgname/"
-    cat <<- EOF > "$pkgdir/usr/share/$pkgname/crossover_patcher.sh"
+    cat -A <<- EOF > "$pkgdir/usr/share/$pkgname/crossover_patcher.sh"
 	    #!/bin/env bash
 
             # Fix license
@@ -148,7 +148,7 @@ package() {
     EOF
 
     mkdir -p "$pkgdir/usr/share/libalpm/hooks/"
-    cat <<- EOF > "$pkgdir/usr/share/libalpm/hooks/crossover-patch.hook"
+    cat -A <<- EOF > "$pkgdir/usr/share/libalpm/hooks/crossover-patch.hook"
 	    [Trigger]
 	    Type = Package
 	    Operation = Install
