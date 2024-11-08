@@ -71,7 +71,7 @@ build() {
         } >> .yarnrc
         sed -i "s/registry.yarnpkg.com/registry.npmmirror.com/g" yarn.lock
     fi
-    sed "s|\"electron\": \"\([^\"]*\)\"|\"electron\": \"${SYSTEM_ELECTRON_VERSION}\"|g" -i package.json
+    sed -i "s|\"electron\": \"\([^\"]*\)\"|\"electron\": \"${SYSTEM_ELECTRON_VERSION}\"|g" package.json
     NODE_ENV=development    yarn install --cache-folder "${srcdir}/.yarn_cache"
     NODE_ENV=production     yarn run package
 }
