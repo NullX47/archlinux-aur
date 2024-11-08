@@ -64,7 +64,7 @@ build() {
             echo "pluginsFolder "${srcdir}"/.yarn/plugins"
             echo "globalFolder "${srcdir}"/.yarn/global"
             echo 'useHardlinks true'
-            echo 'buildFromSource true'
+            #echo 'buildFromSource true'
             echo 'linkWorkspacePackages true'
             echo 'fetchRetries 3'
             echo 'fetchRetryTimeout 10000'
@@ -72,7 +72,6 @@ build() {
         sed -i "s/registry.yarnpkg.com/registry.npmmirror.com/g" yarn.lock
     fi
     sed "s|\"electron\": \"\([^\"]*\)\"|\"electron\": \"${SYSTEM_ELECTRON_VERSION}\"|g" -i package.json
-    yarn add electron --save-dev
     NODE_ENV=development    yarn install --cache-folder "${srcdir}/.yarn_cache"
     NODE_ENV=production     yarn run package
 }
