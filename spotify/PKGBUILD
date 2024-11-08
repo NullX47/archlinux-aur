@@ -105,6 +105,7 @@ package() {
             spicetify config current_theme marketplace
             spicetify apply
     EOF
+
     mkdir -p "$pkgdir/usr/share/libalpm/hooks/"
     cat <<- EOF > "$pkgdir/usr/share/libalpm/hooks/spotify-patch.hook"
 	    [Trigger]
